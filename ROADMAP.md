@@ -1,0 +1,20 @@
+# Roadmap
+
+| Phase | Goal | Status |
+|---|---|---|
+| 1 | Authentication (signup/login/JWT/protected routes) | ✅ Done |
+| 2 | Resume Upload + Parsing | ⏳ Next |
+| 3 | Dashboard | 🔲 Planned |
+| 4 | AI Question Generation | 🔲 Planned |
+| 5 | Real Interview Flow | 🔲 Planned |
+| 6 | Feedback System | 🔲 Planned |
+| 7 | Session Summary + Analytics | 🔲 Planned |
+| 8 | Voice Mode | 🔲 Planned |
+| 9 | ATS Resume Score | 🔲 Planned |
+| 10 | Progress Tracking | 🔲 Planned |
+
+## Bonus / Stretch Features
+- AI interviewer personalities (Friendly HR, Strict FAANG, Startup Founder, Senior Engineer)
+- Integrated coding round editor (JS/Python/Java/C++)
+- Webcam-based confidence/eye-contact monitoring
+- Shareable interview reports
