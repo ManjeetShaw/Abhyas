@@ -3,8 +3,8 @@
 | Phase | Goal | Status |
 |---|---|---|
 | 1 | Authentication (signup/login/JWT/protected routes) | ✅ Done |
-| 2 | Resume Upload + Parsing | ⏳ Next |
-| 3 | Dashboard | 🔲 Planned |
+| 2 | Resume Upload + Parsing | ✅ Done |
+| 3 | Dashboard | ⏳ Next |
 | 4 | AI Question Generation | 🔲 Planned |
 | 5 | Real Interview Flow | 🔲 Planned |
 | 6 | Feedback System | 🔲 Planned |

@@ -11,6 +11,7 @@ and get a realistic, adaptive interview with instant feedback, scoring, and prog
 
 Currently shipped:
 - [x] Phase 1 — Authentication (signup / login / JWT / protected routes)
+- [x] Phase 2 — Resume Upload + Parsing (PDF text extraction, skill/section detection)
 
 ## Tech Stack
 

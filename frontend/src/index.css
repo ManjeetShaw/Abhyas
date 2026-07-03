@@ -161,3 +161,53 @@ button:disabled {
 .muted {
   color: var(--muted);
 }
+
+.resume-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.resume-form input[type="file"] {
+  color: var(--muted);
+}
+
+.resume-summary h3 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: rgba(108, 92, 231, 0.15);
+  border: 1px solid var(--accent);
+  color: var(--text);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.resume-summary ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+button.danger {
+  background: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+  margin-top: 24px;
+}
+
+button.danger:hover {
+  background: rgba(255, 92, 92, 0.1);
+}
