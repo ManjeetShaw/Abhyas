@@ -15,6 +15,8 @@ Currently shipped:
 - [x] Phase 3 — Dashboard (stats, start-interview flow, interview history)
 - [x] Phase 4 — AI Question Generation (Gemini primary, Grok fallback, resume-personalized)
 - [x] Phase 5 — Real Interview Flow (interactive Q&A loop, per-answer AI feedback + score, session completion with overall score)
+- [x] Phase 6 — Feedback System (4-dimension scoring: clarity, technical accuracy, completeness, confidence)
+- [x] Phase 7 — Session Summary + Analytics (strengths, weak areas, recommended topics, score-history chart)
 
 ## Tech Stack
 

@@ -5,7 +5,11 @@ const questionSchema = new mongoose.Schema(
     question: { type: String, required: true },
     answer: { type: String, default: "" },
     feedback: { type: String, default: "" },
-    score: { type: Number, default: null },
+    score: { type: Number, default: null }, // overall (1-10), avg of the four below
+    clarity: { type: Number, default: null },
+    technicalAccuracy: { type: Number, default: null },
+    completeness: { type: Number, default: null },
+    confidence: { type: Number, default: null },
     followUps: { type: [String], default: [] },
   },
   { _id: true, timestamps: true }
@@ -55,6 +59,10 @@ const interviewSchema = new mongoose.Schema(
       default: [],
     },
     weakAreas: {
+      type: [String],
+      default: [],
+    },
+    recommendedTopics: {
       type: [String],
       default: [],
     },

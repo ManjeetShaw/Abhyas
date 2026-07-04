@@ -131,21 +131,34 @@ ${resumeContext}
 Interview transcript so far:
 ${transcript}
 
-Evaluate the candidate's MOST RECENT answer (the last one in the transcript above). Then ${followUpInstruction}
+Evaluate the candidate's MOST RECENT answer (the last one in the transcript above) on four dimensions, each scored 1-10:
+- clarity: how clearly they communicated their answer
+- technicalAccuracy: correctness/depth of technical content (for non-technical rounds, judge relevance and soundness of reasoning instead)
+- completeness: whether they fully addressed the question
+- confidence: how confident and decisive the answer sounded
+
+Then ${followUpInstruction}
 
 Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra text:
-{"feedback": "1-2 sentences of specific, constructive feedback on the last answer", "score": <integer 1-10>, "followUpQuestion": "the next question text, or null if this was the final round"}`;
+{"feedback": "1-2 sentences of specific, constructive feedback on the last answer", "clarity": <1-10>, "technicalAccuracy": <1-10>, "completeness": <1-10>, "confidence": <1-10>, "followUpQuestion": "the next question text, or null if this was the final round"}`;
 }
 
 async function evaluateAnswer({ role, type, difficulty, resumeText, history, isFinalRound }) {
   const prompt = buildEvaluationPrompt({ role, type, difficulty, resumeText, history, isFinalRound });
   try {
     const rawText = await runWithFallback(prompt);
-    return extractJson(rawText);
+    const parsed = extractJson(rawText);
+    const dims = [parsed.clarity, parsed.technicalAccuracy, parsed.completeness, parsed.confidence];
+    const score = Math.round(dims.reduce((a, b) => a + b, 0) / dims.length);
+    return { ...parsed, score };
   } catch (err) {
     console.warn("Answer evaluation failed entirely, using static fallback:", err.message);
     return {
       feedback: "Thanks for your answer — noted. (AI evaluation is temporarily unavailable.)",
+      clarity: 6,
+      technicalAccuracy: 6,
+      completeness: 6,
+      confidence: 6,
       score: 6,
       followUpQuestion: isFinalRound
         ? null
@@ -154,4 +167,41 @@ async function evaluateAnswer({ role, type, difficulty, resumeText, history, isF
   }
 }
 
-module.exports = { generateOpeningQuestion, evaluateAnswer };
+// ---------- Session summary (Phase 7) ----------
+
+function buildSummaryPrompt({ role, type, difficulty, history }) {
+  const transcript = history
+    .map(
+      (h, i) =>
+        `Q${i + 1}: ${h.question}\nAnswer: ${h.answer}\nScores — clarity:${h.clarity}, technicalAccuracy:${h.technicalAccuracy}, completeness:${h.completeness}, confidence:${h.confidence}`
+    )
+    .join("\n\n");
+
+  return `You are a senior ${type} interviewer wrapping up a ${difficulty}-difficulty mock interview for the role of "${role}".
+
+Full transcript with per-answer scores:
+${transcript}
+
+Write a short overall session summary. Identify 2-4 genuine strengths, 2-4 weak areas to improve, and 2-3 specific topics the candidate should study next.
+
+Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra text:
+{"summary": "2-3 sentence overall summary", "strengths": ["...", "..."], "weakAreas": ["...", "..."], "recommendedTopics": ["...", "..."]}`;
+}
+
+async function generateSessionSummary({ role, type, difficulty, history }) {
+  const prompt = buildSummaryPrompt({ role, type, difficulty, history });
+  try {
+    const rawText = await runWithFallback(prompt);
+    return extractJson(rawText);
+  } catch (err) {
+    console.warn("Session summary generation failed, using static fallback:", err.message);
+    return {
+      summary: `Completed a ${difficulty}-difficulty ${type} interview for ${role} across ${history.length} questions.`,
+      strengths: [],
+      weakAreas: [],
+      recommendedTopics: [],
+    };
+  }
+}
+
+module.exports = { generateOpeningQuestion, evaluateAnswer, generateSessionSummary };

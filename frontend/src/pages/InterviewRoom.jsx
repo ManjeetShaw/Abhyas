@@ -8,6 +8,35 @@ const statusLabel = {
   completed: "Completed",
 };
 
+const DIMENSIONS = [
+  { key: "clarity", label: "Clarity" },
+  { key: "technicalAccuracy", label: "Technical Accuracy" },
+  { key: "completeness", label: "Completeness" },
+  { key: "confidence", label: "Confidence" },
+];
+
+function DimensionBars({ question }) {
+  const hasDims = DIMENSIONS.some((d) => question[d.key] != null);
+  if (!hasDims) return null;
+
+  return (
+    <div className="dimension-bars">
+      {DIMENSIONS.map((d) => (
+        <div className="dimension-row" key={d.key}>
+          <span className="dimension-label">{d.label}</span>
+          <div className="dimension-track">
+            <div
+              className="dimension-fill"
+              style={{ width: `${((question[d.key] || 0) / 10) * 100}%` }}
+            />
+          </div>
+          <span className="dimension-value">{question[d.key] ?? "—"}/10</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function InterviewRoom() {
   const { id } = useParams();
   const [interview, setInterview] = useState(null);
@@ -106,6 +135,7 @@ export default function InterviewRoom() {
                     {q.score != null && <span className="score-pill">{q.score}/10</span>}
                   </div>
                   <p>{q.feedback}</p>
+                  <DimensionBars question={q} />
                 </div>
               )}
             </div>
@@ -119,6 +149,46 @@ export default function InterviewRoom() {
           <h3>Interview Complete</h3>
           <p className="score-pill large">{interview.score}/100</p>
           <p className="muted">{interview.summary}</p>
+
+          {interview.strengths?.length > 0 && (
+            <div className="summary-section">
+              <h4>💪 Strengths</h4>
+              <div className="skill-chips">
+                {interview.strengths.map((s) => (
+                  <span className="chip chip-success" key={s}>
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {interview.weakAreas?.length > 0 && (
+            <div className="summary-section">
+              <h4>🎯 Areas to Improve</h4>
+              <div className="skill-chips">
+                {interview.weakAreas.map((w) => (
+                  <span className="chip chip-warning" key={w}>
+                    {w}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {interview.recommendedTopics?.length > 0 && (
+            <div className="summary-section">
+              <h4>📚 Recommended Topics</h4>
+              <div className="skill-chips">
+                {interview.recommendedTopics.map((t) => (
+                  <span className="chip" key={t}>
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="completion-actions">
             <Link to="/interview/new" className="primary-btn as-link">
               Start Another Interview

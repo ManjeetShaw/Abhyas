@@ -595,3 +595,66 @@ button.danger:hover {
   text-decoration: none;
   display: inline-block;
 }
+
+/* ---------- Phase 6: dimension bars ---------- */
+
+.dimension-bars {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dimension-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+}
+
+.dimension-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.dimension-track {
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dimension-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.dimension-value {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ---------- Phase 7: session summary ---------- */
+
+.summary-section {
+  width: 100%;
+  text-align: left;
+  margin-top: 16px;
+}
+
+.summary-section h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.chip-success {
+  border-color: var(--success);
+  background: rgba(46, 204, 113, 0.12);
+}
+
+.chip-warning {
+  border-color: #f5a623;
+  background: rgba(245, 166, 35, 0.12);
+}

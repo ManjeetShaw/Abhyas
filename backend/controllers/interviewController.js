@@ -1,6 +1,6 @@
 const Interview = require("../models/Interview");
 const Resume = require("../models/Resume");
-const { generateOpeningQuestion, evaluateAnswer } = require("../services/aiService");
+const { generateOpeningQuestion, evaluateAnswer, generateSessionSummary } = require("../services/aiService");
 
 const MAX_QUESTIONS = 5;
 
@@ -72,17 +72,22 @@ const submitAnswer = async (req, res) => {
       .filter((q) => q.answer)
       .map((q) => ({ question: q.question, answer: q.answer }));
 
-    const { feedback, score, followUpQuestion } = await evaluateAnswer({
-      role: interview.role,
-      type: interview.type,
-      difficulty: interview.difficulty,
-      resumeText: resume?.extractedText,
-      history,
-      isFinalRound,
-    });
+    const { feedback, score, clarity, technicalAccuracy, completeness, confidence, followUpQuestion } =
+      await evaluateAnswer({
+        role: interview.role,
+        type: interview.type,
+        difficulty: interview.difficulty,
+        resumeText: resume?.extractedText,
+        history,
+        isFinalRound,
+      });
 
     currentQuestion.feedback = feedback;
     currentQuestion.score = score;
+    currentQuestion.clarity = clarity;
+    currentQuestion.technicalAccuracy = technicalAccuracy;
+    currentQuestion.completeness = completeness;
+    currentQuestion.confidence = confidence;
 
     if (isFinalRound || !followUpQuestion) {
       interview.status = "completed";
@@ -90,7 +95,29 @@ const submitAnswer = async (req, res) => {
       interview.score = scored.length
         ? Math.round((scored.reduce((sum, q) => sum + q.score, 0) / scored.length) * 10)
         : null;
-      interview.summary = `Completed a ${interview.difficulty}-difficulty ${interview.type} interview for ${interview.role} across ${interview.questions.length} questions.`;
+
+      const fullHistory = interview.questions
+        .filter((q) => q.answer)
+        .map((q) => ({
+          question: q.question,
+          answer: q.answer,
+          clarity: q.clarity,
+          technicalAccuracy: q.technicalAccuracy,
+          completeness: q.completeness,
+          confidence: q.confidence,
+        }));
+
+      const summaryResult = await generateSessionSummary({
+        role: interview.role,
+        type: interview.type,
+        difficulty: interview.difficulty,
+        history: fullHistory,
+      });
+
+      interview.summary = summaryResult.summary;
+      interview.strengths = summaryResult.strengths || [];
+      interview.weakAreas = summaryResult.weakAreas || [];
+      interview.recommendedTopics = summaryResult.recommendedTopics || [];
     } else {
       interview.status = "in-progress";
       interview.questions.push({ question: followUpQuestion });
@@ -152,11 +179,16 @@ const getStats = async (req, res) => {
       .slice(0, 3)
       .map(([area]) => area);
 
+    const scoreHistory = completed
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((i) => ({ date: i.createdAt, score: i.score, role: i.role }));
+
     res.status(200).json({
       totalInterviews,
       completedInterviews: completed.length,
       averageScore,
       topWeakAreas,
+      scoreHistory,
     });
   } catch (err) {
     res.status(500).json({ message: "Could not compute stats", error: err.message });

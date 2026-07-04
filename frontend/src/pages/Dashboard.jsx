@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../services/api";
+import ScoreChart from "../components/ScoreChart";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -92,6 +93,27 @@ export default function Dashboard() {
                 Start New Interview
               </Link>
             </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-header">
+              <h3>Progress Over Time</h3>
+            </div>
+            <ScoreChart data={stats?.scoreHistory} />
+            {stats?.topWeakAreas?.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <p className="muted" style={{ marginBottom: 8 }}>
+                  Recurring weak areas:
+                </p>
+                <div className="skill-chips">
+                  {stats.topWeakAreas.map((area) => (
+                    <span className="chip" key={area}>
+                      {area}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="panel">

@@ -7,9 +7,9 @@
 | 3 | Dashboard | ✅ Done |
 | 4 | AI Question Generation | ✅ Done |
 | 5 | Real Interview Flow | ✅ Done |
-| 6 | Feedback System | ⏳ Next (partially done — per-answer scoring already live) |
-| 7 | Session Summary + Analytics | 🔲 Planned |
-| 8 | Voice Mode | 🔲 Planned |
+| 6 | Feedback System | ✅ Done |
+| 7 | Session Summary + Analytics | ✅ Done |
+| 8 | Voice Mode | ⏳ Next |
 | 9 | ATS Resume Score | 🔲 Planned |
 | 10 | Progress Tracking | 🔲 Planned |
 
