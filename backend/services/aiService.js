@@ -1,11 +1,11 @@
 // AI question generation + answer evaluation service.
-// Tries Gemini first (primary), falls back to Grok if Gemini fails or isn't
+// Tries Gemini first (primary), falls back to Groq if Gemini fails or isn't
 // configured, and falls back to safe static responses if both fail — so the
 // app never breaks even without an AI key.
 
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
-const GROK_URL = "https://api.x.ai/v1/chat/completions";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 function extractJson(text) {
   const cleaned = text.replace(/```json|```/g, "").trim();
@@ -38,18 +38,18 @@ async function callGeminiRaw(prompt) {
   return text;
 }
 
-async function callGrokRaw(prompt) {
-  const apiKey = process.env.GROK_API_KEY;
-  if (!apiKey) throw new Error("GROK_API_KEY not configured");
+async function callGroqRaw(prompt) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY not configured");
 
-  const response = await fetch(GROK_URL, {
+  const response = await fetch(GROQ_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "grok-3-latest",
+      model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
       max_tokens: 350,
@@ -58,23 +58,23 @@ async function callGrokRaw(prompt) {
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Grok API error (${response.status}): ${errText}`);
+    throw new Error(`Groq API error (${response.status}): ${errText}`);
   }
 
   const data = await response.json();
   const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error("Grok returned no text content");
+  if (!text) throw new Error("Groq returned no text content");
   return text;
 }
 
-// Runs a prompt through Gemini, falling back to Grok on failure. Returns the
+// Runs a prompt through Gemini, falling back to Groq on failure. Returns the
 // raw text response — caller is responsible for parsing it.
 async function runWithFallback(prompt) {
   try {
     return await callGeminiRaw(prompt);
   } catch (geminiErr) {
-    console.warn("Gemini call failed, falling back to Grok:", geminiErr.message);
-    return await callGrokRaw(prompt);
+    console.warn("Gemini call failed, falling back to Groq:", geminiErr.message);
+    return await callGroqRaw(prompt);
   }
 }
 
