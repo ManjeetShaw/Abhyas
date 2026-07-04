@@ -211,3 +211,287 @@ button.danger {
 button.danger:hover {
   background: rgba(255, 92, 92, 0.1);
 }
+
+/* ---------- Phase 3: shared page layout ---------- */
+
+.page-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+}
+
+.link-muted {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  white-space: nowrap;
+  margin-top: 6px;
+}
+
+.link-muted:hover {
+  color: var(--accent);
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  margin-top: 0;
+}
+
+.ghost-btn:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* ---------- Stat cards ---------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Buttons ---------- */
+
+.primary-btn {
+  background: var(--accent);
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.primary-btn.as-link {
+  padding: 11px 20px;
+  margin-top: 12px;
+}
+
+/* ---------- Interview list / cards ---------- */
+
+.interview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.interview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s ease;
+}
+
+.interview-card:hover {
+  border-color: var(--accent);
+}
+
+.interview-card h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.interview-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.small {
+  font-size: 12px;
+}
+
+/* ---------- Badges ---------- */
+
+.badge-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.badge-accent {
+  background: rgba(108, 92, 231, 0.18);
+  color: var(--accent-hover);
+}
+
+.score-pill {
+  background: rgba(46, 204, 113, 0.15);
+  color: var(--success);
+  border: 1px solid var(--success);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---------- Empty state ---------- */
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.empty-state h3 {
+  margin: 0;
+}
+
+/* ---------- Start Interview form ---------- */
+
+.start-interview-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.option-grid.three-col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.option-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px;
+  font-weight: 500;
+  font-size: 13px;
+  margin-top: 0;
+}
+
+.option-card.selected {
+  border-color: var(--accent);
+  background: rgba(108, 92, 231, 0.15);
+  color: var(--text);
+}
+
+.option-card:hover {
+  border-color: var(--accent);
+}
+
+/* ---------- Interview room ---------- */
+
+.interview-room {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.question-bubble {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.coming-soon {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border);
+}

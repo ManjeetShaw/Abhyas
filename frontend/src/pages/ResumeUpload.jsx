@@ -58,13 +58,15 @@ export default function ResumeUpload() {
   if (loading) return <div className="center-screen">Loading...</div>;
 
   return (
-    <div className="dashboard">
-      <header className="dashboard-header">
+    <div className="page-container">
+      <header className="page-header">
         <h1>Resume</h1>
-        <Link to="/dashboard">← Back to Dashboard</Link>
+        <Link to="/dashboard" className="link-muted">
+          ← Back to Dashboard
+        </Link>
       </header>
 
-      <section className="dashboard-body">
+      <div className="panel">
         {error && <div className="error-banner">{error}</div>}
 
         {!resume ? (
@@ -75,7 +77,7 @@ export default function ResumeUpload() {
               accept="application/pdf"
               onChange={(e) => setFile(e.target.files[0])}
             />
-            <button type="submit" disabled={!file || uploading}>
+            <button type="submit" className="primary-btn" disabled={!file || uploading}>
               {uploading ? "Uploading & parsing..." : "Upload Resume"}
             </button>
           </form>
@@ -126,7 +128,7 @@ export default function ResumeUpload() {
             </button>
           </div>
         )}
-      </section>
+      </div>
     </div>
   );
 }

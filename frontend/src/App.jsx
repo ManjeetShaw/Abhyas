@@ -6,6 +6,9 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import ResumeUpload from "./pages/ResumeUpload";
+import StartInterview from "./pages/StartInterview";
+import InterviewRoom from "./pages/InterviewRoom";
+import InterviewHistory from "./pages/InterviewHistory";
 
 export default function App() {
   return (
@@ -29,6 +32,30 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ResumeUpload />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interview/new"
+            element={
+              <ProtectedRoute>
+                <StartInterview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interview/:id"
+            element={
+              <ProtectedRoute>
+                <InterviewRoom />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/interviews"
+            element={
+              <ProtectedRoute>
+                <InterviewHistory />
               </ProtectedRoute>
             }
           />
