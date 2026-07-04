@@ -4,6 +4,7 @@ const dns = require("node:dns");
 // SRV records. Pointing Node directly at public DNS avoids ECONNREFUSED
 // errors on `mongodb+srv://` URIs.
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
