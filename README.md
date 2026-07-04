@@ -14,6 +14,7 @@ Currently shipped:
 - [x] Phase 2 — Resume Upload + Parsing (PDF text extraction, skill/section detection)
 - [x] Phase 3 — Dashboard (stats, start-interview flow, interview history)
 - [x] Phase 4 — AI Question Generation (Gemini primary, Grok fallback, resume-personalized)
+- [x] Phase 5 — Real Interview Flow (interactive Q&A loop, per-answer AI feedback + score, session completion with overall score)
 
 ## Tech Stack
 

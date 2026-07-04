@@ -6,8 +6,8 @@
 | 2 | Resume Upload + Parsing | ✅ Done |
 | 3 | Dashboard | ✅ Done |
 | 4 | AI Question Generation | ✅ Done |
-| 5 | Real Interview Flow | ⏳ Next |
-| 6 | Feedback System | 🔲 Planned |
+| 5 | Real Interview Flow | ✅ Done |
+| 6 | Feedback System | ⏳ Next (partially done — per-answer scoring already live) |
 | 7 | Session Summary + Analytics | 🔲 Planned |
 | 8 | Voice Mode | 🔲 Planned |
 | 9 | ATS Resume Score | 🔲 Planned |

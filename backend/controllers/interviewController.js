@@ -1,6 +1,8 @@
 const Interview = require("../models/Interview");
 const Resume = require("../models/Resume");
-const { generateOpeningQuestion } = require("../services/aiService");
+const { generateOpeningQuestion, evaluateAnswer } = require("../services/aiService");
+
+const MAX_QUESTIONS = 5;
 
 // @route POST /api/interview/start
 // Creates a new interview record with an AI-generated opening question,
@@ -34,6 +36,70 @@ const startInterview = async (req, res) => {
     res.status(201).json({ interview });
   } catch (err) {
     res.status(500).json({ message: "Could not start interview", error: err.message });
+  }
+};
+
+// @route POST /api/interview/:id/answer
+// Records the candidate's answer to the current (last, unanswered) question,
+// gets AI feedback + score for it, and either appends the next question or
+// marks the interview completed with an overall score.
+const submitAnswer = async (req, res) => {
+  try {
+    const { answer } = req.body;
+    if (!answer || !answer.trim()) {
+      return res.status(400).json({ message: "Answer text is required" });
+    }
+
+    const interview = await Interview.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!interview) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+    if (interview.status === "completed") {
+      return res.status(400).json({ message: "This interview has already ended" });
+    }
+
+    const currentQuestion = interview.questions[interview.questions.length - 1];
+    if (currentQuestion.answer) {
+      return res.status(400).json({ message: "Current question has already been answered" });
+    }
+
+    currentQuestion.answer = answer.trim();
+
+    const resume = await Resume.findOne({ userId: req.user.id });
+    const isFinalRound = interview.questions.length >= MAX_QUESTIONS;
+
+    const history = interview.questions
+      .filter((q) => q.answer)
+      .map((q) => ({ question: q.question, answer: q.answer }));
+
+    const { feedback, score, followUpQuestion } = await evaluateAnswer({
+      role: interview.role,
+      type: interview.type,
+      difficulty: interview.difficulty,
+      resumeText: resume?.extractedText,
+      history,
+      isFinalRound,
+    });
+
+    currentQuestion.feedback = feedback;
+    currentQuestion.score = score;
+
+    if (isFinalRound || !followUpQuestion) {
+      interview.status = "completed";
+      const scored = interview.questions.filter((q) => q.score != null);
+      interview.score = scored.length
+        ? Math.round((scored.reduce((sum, q) => sum + q.score, 0) / scored.length) * 10)
+        : null;
+      interview.summary = `Completed a ${interview.difficulty}-difficulty ${interview.type} interview for ${interview.role} across ${interview.questions.length} questions.`;
+    } else {
+      interview.status = "in-progress";
+      interview.questions.push({ question: followUpQuestion });
+    }
+
+    await interview.save();
+    res.status(200).json({ interview });
+  } catch (err) {
+    res.status(500).json({ message: "Could not process answer", error: err.message });
   }
 };
 
@@ -97,4 +163,4 @@ const getStats = async (req, res) => {
   }
 };
 
-module.exports = { startInterview, listInterviews, getInterview, getStats };
+module.exports = { startInterview, submitAnswer, listInterviews, getInterview, getStats };
