@@ -1,9 +1,10 @@
 const Interview = require("../models/Interview");
+const Resume = require("../models/Resume");
+const { generateOpeningQuestion } = require("../services/aiService");
 
 // @route POST /api/interview/start
-// Creates a new interview record. Actual AI-generated questions arrive in
-// Phase 4 — for now we seed a single friendly opening question so the rest
-// of the app (history, status, UI) has something real to render against.
+// Creates a new interview record with an AI-generated opening question,
+// personalized against the candidate's resume when one is on file.
 const startInterview = async (req, res) => {
   try {
     const { role, type, difficulty } = req.body;
@@ -12,17 +13,22 @@ const startInterview = async (req, res) => {
       return res.status(400).json({ message: "Role and interview type are required" });
     }
 
+    const resume = await Resume.findOne({ userId: req.user.id });
+
+    const question = await generateOpeningQuestion({
+      role,
+      type,
+      difficulty: difficulty || "Medium",
+      resumeText: resume?.extractedText,
+    });
+
     const interview = await Interview.create({
       userId: req.user.id,
       role,
       type,
       difficulty: difficulty || "Medium",
       status: "created",
-      questions: [
-        {
-          question: `Tell me a bit about yourself and why you're interested in the ${role} role.`,
-        },
-      ],
+      questions: [{ question }],
     });
 
     res.status(201).json({ interview });

@@ -53,7 +53,7 @@ export default function InterviewRoom() {
       </div>
 
       <div className="panel interview-room">
-        <p className="muted">Interviewer</p>
+        <p className="muted">Interviewer · AI-generated</p>
         <div className="question-bubble">{firstQuestion}</div>
 
         <div className="coming-soon">

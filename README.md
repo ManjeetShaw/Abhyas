@@ -13,6 +13,7 @@ Currently shipped:
 - [x] Phase 1 — Authentication (signup / login / JWT / protected routes)
 - [x] Phase 2 — Resume Upload + Parsing (PDF text extraction, skill/section detection)
 - [x] Phase 3 — Dashboard (stats, start-interview flow, interview history)
+- [x] Phase 4 — AI Question Generation (Gemini primary, Grok fallback, resume-personalized)
 
 ## Tech Stack
 

@@ -5,8 +5,8 @@
 | 1 | Authentication (signup/login/JWT/protected routes) | ✅ Done |
 | 2 | Resume Upload + Parsing | ✅ Done |
 | 3 | Dashboard | ✅ Done |
-| 4 | AI Question Generation | ⏳ Next |
-| 5 | Real Interview Flow | 🔲 Planned |
+| 4 | AI Question Generation | ✅ Done |
+| 5 | Real Interview Flow | ⏳ Next |
 | 6 | Feedback System | 🔲 Planned |
 | 7 | Session Summary + Analytics | 🔲 Planned |
 | 8 | Voice Mode | 🔲 Planned |
