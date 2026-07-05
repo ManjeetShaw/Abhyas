@@ -1,11 +1,10 @@
 // AI question generation + answer evaluation service.
-// Tries Gemini first (primary), falls back to Groq if Gemini fails or isn't
-// configured, and falls back to safe static responses if both fail — so the
-// app never breaks even without an AI key.
+// Uses Groq (free tier, no billing required) as the sole AI provider.
+// Falls back to safe static responses if the Groq call fails for any
+// reason — so the app never breaks even without a working key.
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 function extractJson(text) {
   const cleaned = text.replace(/```json|```/g, "").trim();
@@ -14,31 +13,7 @@ function extractJson(text) {
   return JSON.parse(match[0]);
 }
 
-async function callGeminiRaw(prompt) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
-
-  const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.8, maxOutputTokens: 350 },
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errText}`);
-  }
-
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini returned no text content");
-  return text;
-}
-
-async function callGroqRaw(prompt) {
+async function callGroq(prompt) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY not configured");
 
@@ -49,10 +24,10 @@ async function callGroqRaw(prompt) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
+      model: GROQ_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
-      max_tokens: 350,
+      max_tokens: 400,
     }),
   });
 
@@ -65,17 +40,6 @@ async function callGroqRaw(prompt) {
   const text = data?.choices?.[0]?.message?.content;
   if (!text) throw new Error("Groq returned no text content");
   return text;
-}
-
-// Runs a prompt through Gemini, falling back to Groq on failure. Returns the
-// raw text response — caller is responsible for parsing it.
-async function runWithFallback(prompt) {
-  try {
-    return await callGeminiRaw(prompt);
-  } catch (geminiErr) {
-    console.warn("Gemini call failed, falling back to Groq:", geminiErr.message);
-    return await callGroqRaw(prompt);
-  }
 }
 
 // ---------- Opening question (Phase 4) ----------
@@ -101,15 +65,15 @@ Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra t
 async function generateOpeningQuestion({ role, type, difficulty, resumeText }) {
   const prompt = buildOpeningPrompt({ role, type, difficulty, resumeText });
   try {
-    const rawText = await runWithFallback(prompt);
+    const rawText = await callGroq(prompt);
     return extractJson(rawText).question;
   } catch (err) {
-    console.warn("Opening question generation failed entirely, using static fallback:", err.message);
+    console.warn("Opening question generation failed, using static fallback:", err.message);
     return `Tell me a bit about yourself and why you're interested in the ${role} role.`;
   }
 }
 
-// ---------- Answer evaluation + follow-up (Phase 5) ----------
+// ---------- Answer evaluation + follow-up (Phase 5 + 6) ----------
 
 function buildEvaluationPrompt({ role, type, difficulty, resumeText, history, isFinalRound }) {
   const resumeContext = resumeText
@@ -146,13 +110,13 @@ Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra t
 async function evaluateAnswer({ role, type, difficulty, resumeText, history, isFinalRound }) {
   const prompt = buildEvaluationPrompt({ role, type, difficulty, resumeText, history, isFinalRound });
   try {
-    const rawText = await runWithFallback(prompt);
+    const rawText = await callGroq(prompt);
     const parsed = extractJson(rawText);
     const dims = [parsed.clarity, parsed.technicalAccuracy, parsed.completeness, parsed.confidence];
     const score = Math.round(dims.reduce((a, b) => a + b, 0) / dims.length);
     return { ...parsed, score };
   } catch (err) {
-    console.warn("Answer evaluation failed entirely, using static fallback:", err.message);
+    console.warn("Answer evaluation failed, using static fallback:", err.message);
     return {
       feedback: "Thanks for your answer — noted. (AI evaluation is temporarily unavailable.)",
       clarity: 6,
@@ -162,7 +126,7 @@ async function evaluateAnswer({ role, type, difficulty, resumeText, history, isF
       score: 6,
       followUpQuestion: isFinalRound
         ? null
-        : "Can you walk me through a challenge you faced in a recent project and how you solved it?",
+        : "Can you tell me about another project or experience relevant to this role?",
     };
   }
 }
@@ -191,7 +155,7 @@ Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra t
 async function generateSessionSummary({ role, type, difficulty, history }) {
   const prompt = buildSummaryPrompt({ role, type, difficulty, history });
   try {
-    const rawText = await runWithFallback(prompt);
+    const rawText = await callGroq(prompt);
     return extractJson(rawText);
   } catch (err) {
     console.warn("Session summary generation failed, using static fallback:", err.message);
