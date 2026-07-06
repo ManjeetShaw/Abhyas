@@ -19,6 +19,8 @@ Currently shipped:
 - [x] Phase 7 — Session Summary + Analytics (strengths, weak areas, recommended topics, score-history chart)
 - [x] Phase 8 — Voice Mode (speech-to-text answers, text-to-speech questions, pause/resume)
 - [x] Phase 9 — ATS Resume Score (paste a job description, get match score + missing keywords + suggestions)
+- [x] Bonus — AI Interviewer Personalities (Friendly HR, Strict FAANG, Startup Founder, Senior Engineer)
+- [x] Bonus — Coding Round (in-browser code editor for JS/Python/Java/C++ technical questions)
 
 ## Tech Stack
 

@@ -4,12 +4,20 @@ import api from "../services/api";
 
 const TYPES = ["Technical", "HR", "Behavioral", "System Design"];
 const DIFFICULTIES = ["Easy", "Medium", "Hard"];
+const PERSONALITIES = [
+  { name: "Senior Engineer", blurb: "Calm, precise, mentor-like" },
+  { name: "Friendly HR", blurb: "Warm, encouraging, culture-focused" },
+  { name: "Strict FAANG Interviewer", blurb: "Rigorous, terse, exacting" },
+  { name: "Startup Founder", blurb: "Fast-paced, pragmatic, scrappy" },
+];
 
 export default function StartInterview() {
   const navigate = useNavigate();
   const [role, setRole] = useState("");
   const [type, setType] = useState("Technical");
   const [difficulty, setDifficulty] = useState("Medium");
+  const [personality, setPersonality] = useState("Senior Engineer");
+  const [codingRound, setCodingRound] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,7 +30,13 @@ export default function StartInterview() {
     setError("");
     setSubmitting(true);
     try {
-      const { data } = await api.post("/interview/start", { role, type, difficulty });
+      const { data } = await api.post("/interview/start", {
+        role,
+        type,
+        difficulty,
+        personality,
+        codingRound: type === "Technical" ? codingRound : false,
+      });
       navigate(`/interview/${data.interview._id}`);
     } catch (err) {
       setError(err.response?.data?.message || "Could not start interview");
@@ -80,6 +94,32 @@ export default function StartInterview() {
             </button>
           ))}
         </div>
+
+        <label>Interviewer Personality</label>
+        <div className="option-grid persona-grid">
+          {PERSONALITIES.map((p) => (
+            <button
+              type="button"
+              key={p.name}
+              className={`option-card persona-card ${personality === p.name ? "selected" : ""}`}
+              onClick={() => setPersonality(p.name)}
+            >
+              <span className="persona-name">{p.name}</span>
+              <span className="persona-blurb">{p.blurb}</span>
+            </button>
+          ))}
+        </div>
+
+        {type === "Technical" && (
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={codingRound}
+              onChange={(e) => setCodingRound(e.target.checked)}
+            />
+            💻 Enable Coding Round (write code instead of prose answers)
+          </label>
+        )}
 
         <button type="submit" className="primary-btn" disabled={submitting}>
           {submitting ? "Starting..." : "Start Interview"}

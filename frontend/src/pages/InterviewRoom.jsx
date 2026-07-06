@@ -16,6 +16,8 @@ const DIMENSIONS = [
   { key: "confidence", label: "Confidence" },
 ];
 
+const LANGUAGES = ["javascript", "python", "java", "cpp"];
+
 function DimensionBars({ question }) {
   const hasDims = DIMENSIONS.some((d) => question[d.key] != null);
   if (!hasDims) return null;
@@ -42,6 +44,7 @@ export default function InterviewRoom() {
   const { id } = useParams();
   const [interview, setInterview] = useState(null);
   const [answer, setAnswer] = useState("");
+  const [language, setLanguage] = useState("javascript");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -66,7 +69,6 @@ export default function InterviewRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Sync dictated speech into the answer textarea
   useEffect(() => {
     if (voice.transcript) setAnswer(voice.transcript);
   }, [voice.transcript]);
@@ -74,15 +76,15 @@ export default function InterviewRoom() {
   const questions = interview?.questions || [];
   const currentQuestion = questions[questions.length - 1];
   const isCompleted = interview?.status === "completed";
+  const isCodingRound = interview?.codingRound;
 
-  // Auto-speak a new question once, when voice mode is on
   useEffect(() => {
-    if (!voiceModeOn || !currentQuestion || isCompleted) return;
+    if (!voiceModeOn || !currentQuestion || isCompleted || isCodingRound) return;
     if (lastSpokenQuestionRef.current === currentQuestion.question) return;
     lastSpokenQuestionRef.current = currentQuestion.question;
     voice.speak(currentQuestion.question);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voiceModeOn, currentQuestion?.question, isCompleted]);
+  }, [voiceModeOn, currentQuestion?.question, isCompleted, isCodingRound]);
 
   const handleSubmitAnswer = async (e) => {
     e.preventDefault();
@@ -92,7 +94,8 @@ export default function InterviewRoom() {
     setSubmitting(true);
     setError("");
     try {
-      const { data } = await api.post(`/interview/${id}/answer`, { answer });
+      const payload = isCodingRound ? { answer, language } : { answer };
+      const { data } = await api.post(`/interview/${id}/answer`, payload);
       setInterview(data.interview);
       setAnswer("");
       voice.setTranscript("");
@@ -138,12 +141,14 @@ export default function InterviewRoom() {
       <div className="badge-row">
         <span className="badge">{interview.type}</span>
         <span className="badge">{interview.difficulty}</span>
+        <span className="badge badge-accent">{interview.personality}</span>
+        {isCodingRound && <span className="badge">💻 Coding Round</span>}
         <span className="badge badge-accent">{statusLabel[interview.status]}</span>
         <span className="badge">
           Question {questions.length}
           {isCompleted ? "" : " (in progress)"}
         </span>
-        {(voice.sttSupported || voice.ttsSupported) && !isCompleted && (
+        {!isCodingRound && (voice.sttSupported || voice.ttsSupported) && !isCompleted && (
           <button
             type="button"
             className={`voice-toggle ${voiceModeOn ? "on" : ""}`}
@@ -166,7 +171,13 @@ export default function InterviewRoom() {
               <p className="muted" style={{ marginTop: 14 }}>
                 You
               </p>
-              <div className="answer-bubble">{q.answer}</div>
+              {q.language ? (
+                <pre className="code-bubble">
+                  <code>{q.answer}</code>
+                </pre>
+              ) : (
+                <div className="answer-bubble">{q.answer}</div>
+              )}
 
               {q.feedback && (
                 <div className="feedback-box">
@@ -242,7 +253,7 @@ export default function InterviewRoom() {
         <div className="panel interview-room">
           <div className="interviewer-row">
             <p className="muted">Interviewer · AI-generated</p>
-            {voiceModeOn && voice.ttsSupported && (
+            {!isCodingRound && voiceModeOn && voice.ttsSupported && (
               <div className="voice-controls">
                 {voice.isSpeaking && !voice.isPaused ? (
                   <button type="button" className="icon-btn" onClick={voice.pauseSpeaking} title="Pause">
@@ -268,15 +279,41 @@ export default function InterviewRoom() {
           <div className="question-bubble">{currentQuestion.question}</div>
 
           <form onSubmit={handleSubmitAnswer} className="answer-form">
-            <textarea
-              placeholder={voice.isListening ? "Listening..." : "Type your answer here..."}
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={5}
-              disabled={submitting}
-            />
+            {isCodingRound ? (
+              <>
+                <select
+                  className="language-select"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  disabled={submitting}
+                >
+                  {LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang}
+                    </option>
+                  ))}
+                </select>
+                <textarea
+                  className="code-editor"
+                  placeholder={`// Write your ${language} solution here...`}
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  rows={12}
+                  spellCheck={false}
+                  disabled={submitting}
+                />
+              </>
+            ) : (
+              <textarea
+                placeholder={voice.isListening ? "Listening..." : "Type your answer here..."}
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                rows={5}
+                disabled={submitting}
+              />
+            )}
             <div className="answer-form-actions">
-              {voiceModeOn && voice.sttSupported && (
+              {!isCodingRound && voiceModeOn && voice.sttSupported && (
                 <button
                   type="button"
                   className={`icon-btn mic-btn ${voice.isListening ? "recording" : ""}`}

@@ -9,7 +9,7 @@ const MAX_QUESTIONS = 5;
 // personalized against the candidate's resume when one is on file.
 const startInterview = async (req, res) => {
   try {
-    const { role, type, difficulty } = req.body;
+    const { role, type, difficulty, personality, codingRound } = req.body;
 
     if (!role || !type) {
       return res.status(400).json({ message: "Role and interview type are required" });
@@ -22,6 +22,8 @@ const startInterview = async (req, res) => {
       type,
       difficulty: difficulty || "Medium",
       resumeText: resume?.extractedText,
+      personality: personality || "Senior Engineer",
+      codingRound: !!codingRound,
     });
 
     const interview = await Interview.create({
@@ -29,8 +31,10 @@ const startInterview = async (req, res) => {
       role,
       type,
       difficulty: difficulty || "Medium",
+      personality: personality || "Senior Engineer",
+      codingRound: !!codingRound,
       status: "created",
-      questions: [{ question }],
+      questions: [{ question, language: codingRound ? "javascript" : null }],
     });
 
     res.status(201).json({ interview });
@@ -45,7 +49,7 @@ const startInterview = async (req, res) => {
 // marks the interview completed with an overall score.
 const submitAnswer = async (req, res) => {
   try {
-    const { answer } = req.body;
+    const { answer, language } = req.body;
     if (!answer || !answer.trim()) {
       return res.status(400).json({ message: "Answer text is required" });
     }
@@ -64,13 +68,16 @@ const submitAnswer = async (req, res) => {
     }
 
     currentQuestion.answer = answer.trim();
+    if (interview.codingRound && language) {
+      currentQuestion.language = language;
+    }
 
     const resume = await Resume.findOne({ userId: req.user.id });
     const isFinalRound = interview.questions.length >= MAX_QUESTIONS;
 
     const history = interview.questions
       .filter((q) => q.answer)
-      .map((q) => ({ question: q.question, answer: q.answer }));
+      .map((q) => ({ question: q.question, answer: q.answer, language: q.language }));
 
     const { feedback, score, clarity, technicalAccuracy, completeness, confidence, followUpQuestion } =
       await evaluateAnswer({
@@ -80,6 +87,8 @@ const submitAnswer = async (req, res) => {
         resumeText: resume?.extractedText,
         history,
         isFinalRound,
+        personality: interview.personality,
+        codingRound: interview.codingRound,
       });
 
     currentQuestion.feedback = feedback;
@@ -120,7 +129,10 @@ const submitAnswer = async (req, res) => {
       interview.recommendedTopics = summaryResult.recommendedTopics || [];
     } else {
       interview.status = "in-progress";
-      interview.questions.push({ question: followUpQuestion });
+      interview.questions.push({
+        question: followUpQuestion,
+        language: interview.codingRound ? language || currentQuestion.language : null,
+      });
     }
 
     await interview.save();

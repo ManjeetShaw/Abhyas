@@ -13,6 +13,17 @@ function extractJson(text) {
   return JSON.parse(match[0]);
 }
 
+const PERSONA_STYLES = {
+  "Friendly HR": "warm, encouraging, and conversational — you put candidates at ease, focus on culture fit and soft skills, and phrase feedback gently",
+  "Strict FAANG Interviewer": "rigorous, terse, and exacting — you push hard on depth, correctness, and edge cases, and don't sugarcoat weak answers",
+  "Startup Founder": "fast-paced, pragmatic, and scrappy — you care about ownership, resourcefulness, and getting things done over textbook perfection",
+  "Senior Engineer": "calm, technically precise, and mentor-like — you probe for genuine understanding and give constructive, detailed feedback",
+};
+
+function personaStyle(personality) {
+  return PERSONA_STYLES[personality] || PERSONA_STYLES["Senior Engineer"];
+}
+
 async function callGroq(prompt) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY not configured");
@@ -44,7 +55,7 @@ async function callGroq(prompt) {
 
 // ---------- Opening question (Phase 4) ----------
 
-function buildOpeningPrompt({ role, type, difficulty, resumeText }) {
+function buildOpeningPrompt({ role, type, difficulty, resumeText, personality, codingRound }) {
   const resumeContext = resumeText
     ? `Candidate's resume excerpt (use this to personalize the question):\n"""${resumeText.slice(
         0,
@@ -52,43 +63,75 @@ function buildOpeningPrompt({ role, type, difficulty, resumeText }) {
       )}"""`
     : "No resume was provided — ask a general opening question for this role.";
 
-  return `You are a senior ${type} interviewer conducting a ${difficulty}-difficulty mock interview for the role of "${role}".
+  const style = personaStyle(personality);
+  const codingInstruction = codingRound
+    ? " This is a CODING ROUND — ask a specific coding/algorithm problem the candidate should solve by writing code, not a conversational question."
+    : "";
+
+  return `You are a ${personality || "Senior Engineer"} interviewer — your style is ${style}. You are conducting a ${difficulty}-difficulty ${type} mock interview for the role of "${role}".${codingInstruction}
 
 ${resumeContext}
 
-Generate ONE strong opening interview question. It should be specific and, if resume context is available, reference something concrete from it (a real project, technology, or experience).
+Generate ONE strong opening interview question${codingRound ? " (a coding problem)" : ""}. ${
+    codingRound
+      ? "State the problem clearly, including any input/output expectations."
+      : "It should be specific and, if resume context is available, reference something concrete from it (a real project, technology, or experience)."
+  }
 
 Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra text:
 {"question": "the interview question text"}`;
 }
 
-async function generateOpeningQuestion({ role, type, difficulty, resumeText }) {
-  const prompt = buildOpeningPrompt({ role, type, difficulty, resumeText });
+async function generateOpeningQuestion({ role, type, difficulty, resumeText, personality, codingRound }) {
+  const prompt = buildOpeningPrompt({ role, type, difficulty, resumeText, personality, codingRound });
   try {
     const rawText = await callGroq(prompt);
     return extractJson(rawText).question;
   } catch (err) {
     console.warn("Opening question generation failed, using static fallback:", err.message);
-    return `Tell me a bit about yourself and why you're interested in the ${role} role.`;
+    return codingRound
+      ? `Write a function that solves a common ${role}-relevant coding problem of your choice, and explain your approach.`
+      : `Tell me a bit about yourself and why you're interested in the ${role} role.`;
   }
 }
 
 // ---------- Answer evaluation + follow-up (Phase 5 + 6) ----------
 
-function buildEvaluationPrompt({ role, type, difficulty, resumeText, history, isFinalRound }) {
+function buildEvaluationPrompt({
+  role,
+  type,
+  difficulty,
+  resumeText,
+  history,
+  isFinalRound,
+  personality,
+  codingRound,
+}) {
   const resumeContext = resumeText
     ? `Candidate's resume excerpt:\n"""${resumeText.slice(0, 1500)}"""`
     : "No resume on file.";
 
   const transcript = history
-    .map((h, i) => `Q${i + 1}: ${h.question}\nCandidate's answer: ${h.answer}`)
+    .map((h, i) => {
+      const answerBlock = h.language
+        ? `Candidate's code (${h.language}):\n\`\`\`${h.language}\n${h.answer}\n\`\`\``
+        : `Candidate's answer: ${h.answer}`;
+      return `Q${i + 1}: ${h.question}\n${answerBlock}`;
+    })
     .join("\n\n");
 
+  const style = personaStyle(personality);
   const followUpInstruction = isFinalRound
     ? `This is the FINAL question of the interview. Set "followUpQuestion" to null — do not ask another question.`
+    : codingRound
+    ? `Generate ONE new coding/algorithm problem as the next question (or a variation/extension of the last one). Put it in "followUpQuestion".`
     : `Generate ONE natural, specific follow-up question that digs deeper into the candidate's last answer (or moves to a new relevant angle if their answer was thin). Put it in "followUpQuestion".`;
 
-  return `You are a senior ${type} interviewer running a ${difficulty}-difficulty mock interview for the role of "${role}".
+  const evalNote = codingRound
+    ? "Evaluate the code for correctness, efficiency, and style (treat technicalAccuracy as code correctness/efficiency)."
+    : "";
+
+  return `You are a ${personality || "Senior Engineer"} interviewer — your style is ${style}. You are running a ${difficulty}-difficulty ${type} mock interview for the role of "${role}".
 
 ${resumeContext}
 
@@ -100,6 +143,7 @@ Evaluate the candidate's MOST RECENT answer (the last one in the transcript abov
 - technicalAccuracy: correctness/depth of technical content (for non-technical rounds, judge relevance and soundness of reasoning instead)
 - completeness: whether they fully addressed the question
 - confidence: how confident and decisive the answer sounded
+${evalNote}
 
 Then ${followUpInstruction}
 
@@ -107,8 +151,26 @@ Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra t
 {"feedback": "1-2 sentences of specific, constructive feedback on the last answer", "clarity": <1-10>, "technicalAccuracy": <1-10>, "completeness": <1-10>, "confidence": <1-10>, "followUpQuestion": "the next question text, or null if this was the final round"}`;
 }
 
-async function evaluateAnswer({ role, type, difficulty, resumeText, history, isFinalRound }) {
-  const prompt = buildEvaluationPrompt({ role, type, difficulty, resumeText, history, isFinalRound });
+async function evaluateAnswer({
+  role,
+  type,
+  difficulty,
+  resumeText,
+  history,
+  isFinalRound,
+  personality,
+  codingRound,
+}) {
+  const prompt = buildEvaluationPrompt({
+    role,
+    type,
+    difficulty,
+    resumeText,
+    history,
+    isFinalRound,
+    personality,
+    codingRound,
+  });
   try {
     const rawText = await callGroq(prompt);
     const parsed = extractJson(rawText);
@@ -126,6 +188,8 @@ async function evaluateAnswer({ role, type, difficulty, resumeText, history, isF
       score: 6,
       followUpQuestion: isFinalRound
         ? null
+        : codingRound
+        ? "Write a function to reverse a linked list."
         : "Can you tell me about another project or experience relevant to this role?",
     };
   }

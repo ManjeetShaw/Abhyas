@@ -10,6 +10,7 @@ const questionSchema = new mongoose.Schema(
     technicalAccuracy: { type: Number, default: null },
     completeness: { type: Number, default: null },
     confidence: { type: Number, default: null },
+    language: { type: String, default: null }, // set when answered as code (coding round)
     followUps: { type: [String], default: [] },
   },
   { _id: true, timestamps: true }
@@ -36,6 +37,15 @@ const interviewSchema = new mongoose.Schema(
       type: String,
       enum: ["Easy", "Medium", "Hard"],
       default: "Medium",
+    },
+    personality: {
+      type: String,
+      enum: ["Friendly HR", "Strict FAANG Interviewer", "Startup Founder", "Senior Engineer"],
+      default: "Senior Engineer",
+    },
+    codingRound: {
+      type: Boolean,
+      default: false,
     },
     status: {
       type: String,

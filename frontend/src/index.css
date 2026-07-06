@@ -782,3 +782,94 @@ button.danger:hover {
   font-size: 14px;
   color: var(--muted);
 }
+
+/* ---------- Bonus: persona cards + coding round ---------- */
+
+.persona-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.persona-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.persona-name {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.persona-blurb {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.persona-card.selected .persona-blurb {
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.checkbox-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.checkbox-row input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.language-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  width: fit-content;
+  margin-bottom: 8px;
+}
+
+.code-editor {
+  background: #0a0b0e;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  color: #e7e8ec;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.code-editor:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.code-bubble {
+  background: #0a0b0e;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.code-bubble code {
+  white-space: pre;
+}

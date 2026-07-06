@@ -14,7 +14,7 @@
 | 10 | Progress Tracking | ⏳ Next (mostly covered by Phase 7 analytics) |
 
 ## Bonus / Stretch Features
-- AI interviewer personalities (Friendly HR, Strict FAANG, Startup Founder, Senior Engineer)
-- Integrated coding round editor (JS/Python/Java/C++)
-- Webcam-based confidence/eye-contact monitoring
-- Shareable interview reports
+- [x] AI interviewer personalities (Friendly HR, Strict FAANG, Startup Founder, Senior Engineer)
+- [x] Integrated coding round editor (JS/Python/Java/C++)
+- [ ] Webcam-based confidence/eye-contact monitoring
+- [ ] Shareable interview reports
