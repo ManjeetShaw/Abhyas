@@ -17,6 +17,7 @@ Currently shipped:
 - [x] Phase 5 — Real Interview Flow (interactive Q&A loop, per-answer AI feedback + score, session completion with overall score)
 - [x] Phase 6 — Feedback System (4-dimension scoring: clarity, technical accuracy, completeness, confidence)
 - [x] Phase 7 — Session Summary + Analytics (strengths, weak areas, recommended topics, score-history chart)
+- [x] Phase 8 — Voice Mode (speech-to-text answers, text-to-speech questions, pause/resume)
 
 ## Tech Stack
 

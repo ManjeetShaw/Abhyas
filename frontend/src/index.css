@@ -658,3 +658,65 @@ button.danger:hover {
   border-color: #f5a623;
   background: rgba(245, 166, 35, 0.12);
 }
+
+/* ---------- Phase 8: voice mode ---------- */
+
+.voice-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-top: 0;
+}
+
+.voice-toggle.on {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(108, 92, 231, 0.15);
+}
+
+.interviewer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.voice-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 13px;
+  margin-top: 0;
+  border-radius: 8px;
+}
+
+.icon-btn:hover {
+  border-color: var(--accent);
+}
+
+.answer-form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mic-btn.recording {
+  border-color: var(--error);
+  color: var(--error);
+  background: rgba(255, 92, 92, 0.1);
+  animation: pulse 1.4s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 92, 92, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 92, 92, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 92, 92, 0); }
+}

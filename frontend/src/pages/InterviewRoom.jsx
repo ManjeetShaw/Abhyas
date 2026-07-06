@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../services/api";
+import { useVoice } from "../hooks/useVoice";
 
 const statusLabel = {
   created: "Just started",
@@ -44,6 +45,10 @@ export default function InterviewRoom() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [voiceModeOn, setVoiceModeOn] = useState(false);
+  const lastSpokenQuestionRef = useRef(null);
+
+  const voice = useVoice();
 
   const fetchInterview = async () => {
     try {
@@ -58,22 +63,52 @@ export default function InterviewRoom() {
 
   useEffect(() => {
     fetchInterview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  // Sync dictated speech into the answer textarea
+  useEffect(() => {
+    if (voice.transcript) setAnswer(voice.transcript);
+  }, [voice.transcript]);
+
+  const questions = interview?.questions || [];
+  const currentQuestion = questions[questions.length - 1];
+  const isCompleted = interview?.status === "completed";
+
+  // Auto-speak a new question once, when voice mode is on
+  useEffect(() => {
+    if (!voiceModeOn || !currentQuestion || isCompleted) return;
+    if (lastSpokenQuestionRef.current === currentQuestion.question) return;
+    lastSpokenQuestionRef.current = currentQuestion.question;
+    voice.speak(currentQuestion.question);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voiceModeOn, currentQuestion?.question, isCompleted]);
 
   const handleSubmitAnswer = async (e) => {
     e.preventDefault();
     if (!answer.trim()) return;
+    voice.stopListening();
+    voice.stopSpeaking();
     setSubmitting(true);
     setError("");
     try {
       const { data } = await api.post(`/interview/${id}/answer`, { answer });
       setInterview(data.interview);
       setAnswer("");
+      voice.setTranscript("");
     } catch (err) {
       setError(err.response?.data?.message || "Could not submit answer");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const toggleVoiceMode = () => {
+    if (voiceModeOn) {
+      voice.stopSpeaking();
+      voice.stopListening();
+    }
+    setVoiceModeOn((v) => !v);
   };
 
   if (loading) return <div className="center-screen">Loading...</div>;
@@ -89,9 +124,6 @@ export default function InterviewRoom() {
     );
   }
 
-  const questions = interview.questions || [];
-  const currentQuestion = questions[questions.length - 1];
-  const isCompleted = interview.status === "completed";
   const answeredQuestions = questions.filter((q) => q.answer);
 
   return (
@@ -111,11 +143,19 @@ export default function InterviewRoom() {
           Question {questions.length}
           {isCompleted ? "" : " (in progress)"}
         </span>
+        {(voice.sttSupported || voice.ttsSupported) && !isCompleted && (
+          <button
+            type="button"
+            className={`voice-toggle ${voiceModeOn ? "on" : ""}`}
+            onClick={toggleVoiceMode}
+          >
+            🎙️ Voice Mode {voiceModeOn ? "On" : "Off"}
+          </button>
+        )}
       </div>
 
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Conversation history: previously answered questions */}
       {answeredQuestions.length > 0 && (
         <div className="qa-history">
           {answeredQuestions.map((q, i) => (
@@ -200,20 +240,57 @@ export default function InterviewRoom() {
         </div>
       ) : (
         <div className="panel interview-room">
-          <p className="muted">Interviewer · AI-generated</p>
+          <div className="interviewer-row">
+            <p className="muted">Interviewer · AI-generated</p>
+            {voiceModeOn && voice.ttsSupported && (
+              <div className="voice-controls">
+                {voice.isSpeaking && !voice.isPaused ? (
+                  <button type="button" className="icon-btn" onClick={voice.pauseSpeaking} title="Pause">
+                    ⏸️
+                  </button>
+                ) : voice.isSpeaking && voice.isPaused ? (
+                  <button type="button" className="icon-btn" onClick={voice.resumeSpeaking} title="Resume">
+                    ▶️
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={() => voice.speak(currentQuestion.question)}
+                    title="Play question"
+                  >
+                    🔊
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <div className="question-bubble">{currentQuestion.question}</div>
 
           <form onSubmit={handleSubmitAnswer} className="answer-form">
             <textarea
-              placeholder="Type your answer here..."
+              placeholder={voice.isListening ? "Listening..." : "Type your answer here..."}
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               rows={5}
               disabled={submitting}
             />
-            <button type="submit" className="primary-btn" disabled={submitting || !answer.trim()}>
-              {submitting ? "Evaluating..." : "Submit Answer"}
-            </button>
+            <div className="answer-form-actions">
+              {voiceModeOn && voice.sttSupported && (
+                <button
+                  type="button"
+                  className={`icon-btn mic-btn ${voice.isListening ? "recording" : ""}`}
+                  onClick={voice.isListening ? voice.stopListening : voice.startListening}
+                  disabled={submitting}
+                  title={voice.isListening ? "Stop dictating" : "Dictate your answer"}
+                >
+                  {voice.isListening ? "⏹️ Stop" : "🎤 Speak Answer"}
+                </button>
+              )}
+              <button type="submit" className="primary-btn" disabled={submitting || !answer.trim()}>
+                {submitting ? "Evaluating..." : "Submit Answer"}
+              </button>
+            </div>
           </form>
         </div>
       )}

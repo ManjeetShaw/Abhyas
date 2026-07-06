@@ -9,8 +9,8 @@
 | 5 | Real Interview Flow | ✅ Done |
 | 6 | Feedback System | ✅ Done |
 | 7 | Session Summary + Analytics | ✅ Done |
-| 8 | Voice Mode | ⏳ Next |
-| 9 | ATS Resume Score | 🔲 Planned |
+| 8 | Voice Mode | ✅ Done |
+| 9 | ATS Resume Score | ⏳ Next |
 | 10 | Progress Tracking | 🔲 Planned |
 
 ## Bonus / Stretch Features
