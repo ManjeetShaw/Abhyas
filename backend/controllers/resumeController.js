@@ -1,6 +1,8 @@
 const fs = require("fs");
 const Resume = require("../models/Resume");
 const { parseResumeFile } = require("../services/resumeParser");
+const { scoreResumeAts } = require("../services/aiService");
+
 // @route POST /api/resume/upload
 const uploadResume = async (req, res) => {
   try {
@@ -78,4 +80,39 @@ const deleteResume = async (req, res) => {
   }
 };
 
-module.exports = { uploadResume, getResume, deleteResume };
+// @route POST /api/resume/ats-score
+// Scores the candidate's uploaded resume against a pasted job description
+// using AI, and persists the result on the Resume document.
+const getAtsScore = async (req, res) => {
+  try {
+    const { jobDescription } = req.body;
+    if (!jobDescription || !jobDescription.trim()) {
+      return res.status(400).json({ message: "Job description is required" });
+    }
+
+    const resume = await Resume.findOne({ userId: req.user.id });
+    if (!resume) {
+      return res.status(404).json({ message: "Upload a resume first" });
+    }
+
+    const result = await scoreResumeAts({
+      resumeText: resume.extractedText,
+      jobDescription,
+    });
+
+    resume.lastAtsCheck = {
+      atsScore: result.atsScore,
+      missingKeywords: result.missingKeywords || [],
+      suggestions: result.suggestions || [],
+      jobDescription,
+      checkedAt: new Date(),
+    };
+    await resume.save();
+
+    res.status(200).json({ atsCheck: resume.lastAtsCheck });
+  } catch (err) {
+    res.status(500).json({ message: "Could not compute ATS score", error: err.message });
+  }
+};
+
+module.exports = { uploadResume, getResume, deleteResume, getAtsScore };

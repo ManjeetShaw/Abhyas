@@ -88,6 +88,10 @@ export default function ResumeUpload() {
               {new Date(resume.uploadedAt || resume.createdAt).toLocaleDateString()}
             </p>
 
+            <Link to="/ats-score" className="ghost-btn as-link" style={{ marginBottom: 16, display: "inline-block" }}>
+              📊 Check ATS Score Against a Job
+            </Link>
+
             <h3>Detected Skills</h3>
             {resume.skills?.length ? (
               <div className="skill-chips">

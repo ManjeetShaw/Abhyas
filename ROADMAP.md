@@ -10,8 +10,8 @@
 | 6 | Feedback System | ✅ Done |
 | 7 | Session Summary + Analytics | ✅ Done |
 | 8 | Voice Mode | ✅ Done |
-| 9 | ATS Resume Score | ⏳ Next |
-| 10 | Progress Tracking | 🔲 Planned |
+| 9 | ATS Resume Score | ✅ Done |
+| 10 | Progress Tracking | ⏳ Next (mostly covered by Phase 7 analytics) |
 
 ## Bonus / Stretch Features
 - AI interviewer personalities (Friendly HR, Strict FAANG, Startup Founder, Senior Engineer)

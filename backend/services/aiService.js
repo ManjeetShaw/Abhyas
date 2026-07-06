@@ -168,4 +168,38 @@ async function generateSessionSummary({ role, type, difficulty, history }) {
   }
 }
 
-module.exports = { generateOpeningQuestion, evaluateAnswer, generateSessionSummary };
+// ---------- ATS Resume Score (Phase 9) ----------
+
+function buildAtsPrompt({ resumeText, jobDescription }) {
+  return `You are an ATS (Applicant Tracking System) resume screening engine.
+
+Job description:
+"""${jobDescription.slice(0, 3000)}"""
+
+Candidate's resume:
+"""${resumeText.slice(0, 3000)}"""
+
+Score how well this resume matches the job description as an ATS would (0-100), list important keywords/skills from the job description that are MISSING from the resume, and give 2-4 concrete, actionable suggestions to improve the match.
+
+Respond with ONLY valid JSON in this exact shape, no markdown fences, no extra text:
+{"atsScore": <integer 0-100>, "missingKeywords": ["...", "..."], "suggestions": ["...", "..."]}`;
+}
+
+async function scoreResumeAts({ resumeText, jobDescription }) {
+  const prompt = buildAtsPrompt({ resumeText, jobDescription });
+  try {
+    const rawText = await callGroq(prompt);
+    return extractJson(rawText);
+  } catch (err) {
+    console.warn("ATS scoring failed, using static fallback:", err.message);
+    return {
+      atsScore: null,
+      missingKeywords: [],
+      suggestions: [
+        "AI scoring is temporarily unavailable — try again in a moment.",
+      ],
+    };
+  }
+}
+
+module.exports = { generateOpeningQuestion, evaluateAnswer, generateSessionSummary, scoreResumeAts };
