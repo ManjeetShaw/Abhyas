@@ -9,6 +9,7 @@ import ResumeUpload from "./pages/ResumeUpload";
 import StartInterview from "./pages/StartInterview";
 import InterviewRoom from "./pages/InterviewRoom";
 import InterviewHistory from "./pages/InterviewHistory";
+import AtsScore from "./pages/AtsScore";
 
 export default function App() {
   return (
@@ -56,6 +57,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <InterviewHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ats-score"
+            element={
+              <ProtectedRoute>
+                <AtsScore />
               </ProtectedRoute>
             }
           />

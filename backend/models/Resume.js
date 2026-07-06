@@ -28,6 +28,13 @@ const resumeSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    lastAtsCheck: {
+      atsScore: { type: Number, default: null },
+      missingKeywords: { type: [String], default: [] },
+      suggestions: { type: [String], default: [] },
+      jobDescription: { type: String, default: "" },
+      checkedAt: { type: Date, default: null },
+    },
     experience: {
       type: [String],
       default: [],
