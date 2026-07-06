@@ -1,7 +1,6 @@
 const fs = require("fs");
 const Resume = require("../models/Resume");
 const { parseResumeFile } = require("../services/resumeParser");
-
 // @route POST /api/resume/upload
 const uploadResume = async (req, res) => {
   try {
