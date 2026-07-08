@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import PasswordInput from "../components/PasswordInput";
 
 export default function Login() {
   const { login } = useAuth();
@@ -40,7 +41,7 @@ export default function Login() {
 
         <label>
           Password
-          <input type="password" name="password" value={form.password} onChange={handleChange} required />
+          <PasswordInput name="password" value={form.password} onChange={handleChange} required />
         </label>
 
         <button type="submit" disabled={submitting}>
