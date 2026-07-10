@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api";
 
 const TYPES = ["Technical", "HR", "Behavioral", "System Design"];
@@ -13,11 +13,12 @@ const PERSONALITIES = [
 
 export default function StartInterview() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [role, setRole] = useState("");
-  const [type, setType] = useState("Technical");
+  const [type, setType] = useState(location.state?.presetType || "Technical");
   const [difficulty, setDifficulty] = useState("Medium");
   const [personality, setPersonality] = useState("Senior Engineer");
-  const [codingRound, setCodingRound] = useState(false);
+  const [codingRound, setCodingRound] = useState(!!location.state?.presetCoding);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
