@@ -18,9 +18,22 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+// CLIENT_URL can be a comma-separated list, e.g.
+// "https://abhyas.binarybuilds.online,https://abhyas-seven.vercel.app"
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((o) => o.trim());
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow non-browser requests (no origin header) and any listed origin
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
   })
 );

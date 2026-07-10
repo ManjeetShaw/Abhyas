@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const User = require("../models/User");
 const { generateToken, setTokenCookie } = require("../utils/generateToken");
+const { sendPasswordResetEmail } = require("../services/emailService");
 
 // @route POST /api/auth/signup
 const signup = async (req, res) => {
@@ -77,9 +78,6 @@ const getMe = async (req, res) => {
 };
 
 // @route POST /api/auth/forgot-password
-// Generates a reset token. Wiring up an actual email service is a follow-up
-// task (Phase 2+) — for now this returns the token directly in dev mode so
-// the flow can be tested end-to-end.
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -95,9 +93,27 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 min
     await user.save({ validateBeforeSave: false });
 
+    // CLIENT_URL may be a comma-separated list (multiple allowed origins) —
+    // use the first one as the canonical link target for emails.
+    const primaryClientUrl = (process.env.CLIENT_URL || "http://localhost:5173")
+      .split(",")[0]
+      .trim();
+    const resetLink = `${primaryClientUrl}/reset-password/${resetToken}`;
+
+    try {
+      await sendPasswordResetEmail({ to: user.email, resetLink });
+    } catch (emailErr) {
+      console.error("Failed to send password reset email:", emailErr.message);
+      // Don't fail the request just because email delivery failed — the
+      // token still exists and works if surfaced another way (e.g. logs
+      // during local dev without an email key configured).
+    }
+
     const response = { message: "If that account exists, a reset link has been sent" };
-    if (process.env.NODE_ENV !== "production") {
-      response.devResetToken = resetToken; // remove once email delivery is wired up
+    if (!process.env.RESEND_API_KEY) {
+      // No email provider configured (e.g. local dev) — surface the link
+      // directly so the flow is still testable end-to-end.
+      response.devResetLink = resetLink;
     }
 
     res.status(200).json(response);

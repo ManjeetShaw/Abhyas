@@ -5,6 +5,7 @@ import api from "../services/api";
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [devResetLink, setDevResetLink] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -13,6 +14,7 @@ export default function ForgotPassword() {
     try {
       const { data } = await api.post("/auth/forgot-password", { email });
       setMessage(data.message);
+      setDevResetLink(data.devResetLink || "");
     } catch {
       setMessage("Something went wrong. Please try again.");
     } finally {
@@ -27,6 +29,13 @@ export default function ForgotPassword() {
         <p className="subtitle">Enter your email and we'll send you a reset link.</p>
 
         {message && <div className="info-banner">{message}</div>}
+        {devResetLink && (
+          <div className="info-banner">
+            No email provider configured — use this link directly:
+            <br />
+            <a href={devResetLink}>{devResetLink}</a>
+          </div>
+        )}
 
         <label>
           Email
