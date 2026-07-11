@@ -11,6 +11,18 @@
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+:root[data-theme="light"] {
+  --bg: #f7f7fa;
+  --surface: #ffffff;
+  --border: #e3e4ea;
+  --text: #1a1b23;
+  --muted: #6b6d7d;
+  --accent: #6c5ce7;
+  --accent-hover: #5b4bd6;
+  --error: #d63e3e;
+  --success: #1f9d55;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -18,6 +30,7 @@
 body {
   margin: 0;
   background: var(--bg);
+  transition: background 0.2s ease, color 0.2s ease;
   color: var(--text);
 }
 
@@ -901,4 +914,54 @@ button.danger:hover {
 
 .code-bubble code {
   white-space: pre;
+}
+
+/* ---------- Profile / Account Settings / Help ---------- */
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.profile-avatar-lg {
+  width: 56px;
+  height: 56px;
+  font-size: 18px;
+}
+
+.profile-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 420px;
+}
+
+.faq-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-item h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+
+.faq-item p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
 }

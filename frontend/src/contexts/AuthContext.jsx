@@ -39,8 +39,21 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateProfile = async (payload) => {
+    const { data } = await api.patch("/auth/profile", payload);
+    setUser(data.user);
+    return data.user;
+  };
+
+  const changePassword = async (payload) => {
+    const { data } = await api.post("/auth/change-password", payload);
+    return data;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, signup, login, logout, updateProfile, changePassword }}
+    >
       {children}
     </AuthContext.Provider>
   );

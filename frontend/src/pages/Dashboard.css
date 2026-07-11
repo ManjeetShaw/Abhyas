@@ -1,20 +1,27 @@
 .db {
-  --db-bg: #0c0e16;
+  --db-bg: #0b0e14;
   --db-surface: #14172245;
-  --db-card: linear-gradient(155deg, #1b1f2e 0%, #14161f 100%);
-  --db-border: #262a3a;
-  --db-text: #eef0f5;
-  --db-muted: #8d92a6;
-  --db-blue: #4f7df3;
-  --db-violet: #8b5cf6;
-  --db-pink: #f43f6e;
+  --db-card: linear-gradient(155deg, #171b28 0%, #0f121b 100%);
+  --db-border: #232838;
+  --db-text: #edeff3;
+  --db-muted: #8a90a0;
+  --db-blue: #f2a93c;
+  --db-violet: #6c5ce7;
+  --db-pink: #34d1b4;
   --db-teal: #34d1b4;
+  --db-amber: #f2a93c;
+  --db-amber-dim: #d9932a;
 
   max-width: 1180px;
   margin: 0 auto;
   padding: 28px 24px 64px;
   color: var(--db-text);
-  font-family: "Inter", -apple-system, sans-serif;
+  font-family: "Manrope", -apple-system, sans-serif;
+}
+
+.db-welcome h1 {
+  font-family: "Fraunces", serif;
+  font-weight: 600;
 }
 
 .db-topbar {
@@ -168,7 +175,7 @@
 }
 
 .db-type-pill:hover {
-  border-color: var(--db-violet);
+  border-color: var(--db-amber);
   transform: translateY(-1px);
 }
 
@@ -201,7 +208,7 @@
 }
 
 .db-mini-link {
-  color: var(--db-blue);
+  color: var(--db-amber);
   font-size: 12px;
   text-decoration: none;
 }
@@ -223,17 +230,17 @@
 .db-continue-btn {
   display: inline-block;
   margin-top: 12px;
-  background: var(--db-violet);
-  color: #fff;
+  background: var(--db-amber);
+  color: #1a1204;
   padding: 9px 18px;
   border-radius: 10px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
 }
 
 .db-continue-btn:hover {
-  background: #7c4ee0;
+  background: var(--db-amber-dim);
 }
 
 /* ---------- Feature promo tiles ---------- */
@@ -269,15 +276,17 @@
 }
 
 .db-promo-tile.blue {
-  background: linear-gradient(145deg, #4f7df3, #3457c9);
+  background: linear-gradient(145deg, #f2a93c, #d9932a);
+  color: #1a1204;
 }
 
 .db-promo-tile.violet {
-  background: linear-gradient(145deg, #8b5cf6, #6d3fd6);
+  background: linear-gradient(145deg, #8b7cf6, #6c5ce7);
 }
 
 .db-promo-tile.pink {
-  background: linear-gradient(145deg, #f43f6e, #d42457);
+  background: linear-gradient(145deg, #34d1b4, #24a891);
+  color: #06231d;
 }
 
 .db-promo-icon {

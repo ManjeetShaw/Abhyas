@@ -146,4 +146,70 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, logout, getMe, forgotPassword, resetPassword };
+// @route PATCH /api/auth/profile
+const updateProfile = async (req, res) => {
+  try {
+    const { name, targetRole } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (name !== undefined) {
+      if (!name.trim()) {
+        return res.status(400).json({ message: "Name cannot be empty" });
+      }
+      user.name = name.trim();
+    }
+    if (targetRole !== undefined) {
+      user.targetRole = targetRole.trim();
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        targetRole: user.targetRole,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Could not update profile", error: err.message });
+  }
+};
+
+// @route POST /api/auth/change-password
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    const user = await User.findById(req.user.id).select("+password");
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Could not change password", error: err.message });
+  }
+};
+
+module.exports = {
+  signup,
+  login,
+  logout,
+  getMe,
+  forgotPassword,
+  resetPassword,
+  updateProfile,
+  changePassword,
+};

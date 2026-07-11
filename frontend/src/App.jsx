@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./layouts/AppLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -12,6 +12,9 @@ import StartInterview from "./pages/StartInterview";
 import InterviewRoom from "./pages/InterviewRoom";
 import InterviewHistory from "./pages/InterviewHistory";
 import AtsScore from "./pages/AtsScore";
+import Profile from "./pages/Profile";
+import AccountSettings from "./pages/AccountSettings";
+import Help from "./pages/Help";
 
 export default function App() {
   return (
@@ -23,54 +26,18 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/resume"
-            element={
-              <ProtectedRoute>
-                <ResumeUpload />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/interview/new"
-            element={
-              <ProtectedRoute>
-                <StartInterview />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/interview/:id"
-            element={
-              <ProtectedRoute>
-                <InterviewRoom />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/interviews"
-            element={
-              <ProtectedRoute>
-                <InterviewHistory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/ats-score"
-            element={
-              <ProtectedRoute>
-                <AtsScore />
-              </ProtectedRoute>
-            }
-          />
+
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/resume" element={<ResumeUpload />} />
+            <Route path="/interview/new" element={<StartInterview />} />
+            <Route path="/interview/:id" element={<InterviewRoom />} />
+            <Route path="/interviews" element={<InterviewHistory />} />
+            <Route path="/ats-score" element={<AtsScore />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/account-settings" element={<AccountSettings />} />
+            <Route path="/help" element={<Help />} />
+          </Route>
         </Routes>
       </AuthProvider>
     </BrowserRouter>
