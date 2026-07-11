@@ -97,7 +97,7 @@
 }
 
 .sidebar-link.active {
-  background: rgba(108, 92, 231, 0.14);
+  background: rgba(242, 169, 60, 0.14);
   color: var(--accent);
 }
 
@@ -280,7 +280,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(145deg, var(--accent), #4f7df3);
+  background: linear-gradient(145deg, #8b5cf6, #34d1b4);
   color: #fff;
   display: flex;
   align-items: center;
